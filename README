@@ -1,0 +1,38 @@
+Requirements: python, imagemagick, flickr account
+
+1. After extraction, put Blog/ directory into WWW/blog_owner/
+
+1. Input file structure: Blog content stored in two files: WWW/blog_owner/Blog/[prefix]_content.txt, WWW/blog_owner/Blog/[prefix]_index.txt (view samples for the format)
+
+Format (view samples blog_index.txt, blog_content.txt for the details):
+[prefix]_index.txt:
+    - 1st row: list of ", "-separated categories
+    - following rows: [article_id]; [article_name]; [article_date]; list of ", "-separated categories it belongs to 
+
+[prefix]_content.txt:
+    - 1st paragraph: About
+    - following blocks:
+[Title]
+
+[Body]
+Gallery:
+pic1 pic2 pic3
+pic4 pic5 pic6
+
+Notes: Gallery is optional. Each row denotes a page in scrollable viewer.
+
+2. Output file structure: 
+   default view: index.html
+   main blog page: [page title]_[page#].html
+   category page: [category]_[page#].html
+
+2. Usage:
+
+- Blog update (with banner): update_blog.sh [content file prefix] [page title] [#pictures in banner widget] [image directory] [flickr username]
+
+- Blog update (without banner): BlogGenerator [content file prefix] [page title]
+
+3. Comments: 
+
+- generates static pages (no problem with hosting permissions)
+- banner generation can be automatized e.g. by setting up a cronjob (if your host allows that)
