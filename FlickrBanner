@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+import re 
+import os
+import sys
+
+def create_banner(user_name, pic_number, path):
+    pattern = "(?<=/photos/%s/)(\w)*(?=/in/photostream)" % user_name
+    compiled_pattern = re.compile(pattern)
+    output_file = "pics_to_banner"
+
+    for page_number in range(1,3):
+        if not os.path.exists(output_file):
+            os.spawnlp(os.P_WAIT, 'wget', 'wget', 'http://www.flickr.com/photos/%s/page%d' % (user_name, page_number), '-O', output_file + str(page_number))
+
+    hashes = []
+    for page_number in range(1,3):
+        input_file = "pics_to_banner" + str(page_number)
+        f = open(input_file, "r")
+        for line in f.readlines():
+            m = compiled_pattern.search(line)
+            if m:
+                hashes.append(m.group())
+        f.close()    
+        os.remove(input_file)
+
+    download_pattern = "(?<=http://farm)(\S)*(?=.jpg)"
+    compiled_download_pattern = re.compile(download_pattern)
+
+    output_file = "web_source"
+
+    for pic_count in range(pic_number):
+        pic_hash = hashes[pic_count]
+        website = "http://www.flickr.com/photos/%s/%s/sizes/l/in/photostream" % (user_name, pic_hash)
+        if not os.path.exists(output_file):
+            os.spawnlp(os.P_WAIT, 'wget', 'wget', website, '-O', output_file)
+    
+        f = open(output_file, "r")
+        for line in f.readlines():
+            m = compiled_download_pattern.search(line)
+            if m:
+                jpg_address = "http://farm" + m.group() + ".jpg"
+                break
+
+        jpg_file = path + "/pic" + str(pic_count) + ".jpg"
+        os.spawnlp(os.P_WAIT, 'wget', 'wget', jpg_address, '-O', jpg_file)
+
+        f.close()
+        os.remove(output_file)
+
+pic_number = int(sys.argv[1])
+path = sys.argv[2]
+user_name = sys.argv[3]
+
+create_banner(user_name, pic_number, path)

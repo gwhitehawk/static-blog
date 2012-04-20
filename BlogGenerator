@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+import re
+import sys
+import time
+import datetime
+
+from BlogUnits import Article
+from BlogUnits import Template
+from BlogUnits import GenBlogPages
+
+articles_per_page = 2
+
+# master_file stores relevant files
+master = sys.argv[1]
+website_title = sys.argv[2]
+
+# index data
+# format:
+# article_count per_page 
+# category_1 category_2 .. category_n
+# art_id_1; art_name_1; date_1; category_1, ..., category_n 
+# art_id_2; art_name_2; date_2; category_2, ..., category_m
+config_file = master + "_index.txt"
+
+# content data
+# format:
+# About
+#
+# Title: Title_1
+#
+# Body
+# 
+# Title: Title_2
+#
+# Body
+content_file = master + "_content.txt"
+
+configs = open (config_file, 'r')
+content = open (content_file, 'r')
+
+line = configs.readline()
+line = line.strip()
+categories = line.split(", ")
+
+article_list = []
+whole_content = content.read()
+content_splitted = whole_content.split("\n\n")
+
+i = 1
+
+for line in configs.readlines():
+    line = line.strip()
+    sline = line.split("; ")
+    num_id = sline[0]
+    title = sline[1]
+    date = time.strptime(sline[2], "%d%b%Y")
+    cats = sline[3].split(", ")
+    
+    new_article = Article(num_id, title, date, cats, content_splitted[2*i],)
+
+    article_list.append(new_article)
+    i += 1
+
+gen_blog = GenBlogPages(website_title, content_splitted[0], "blog_style.css")
+pages = gen_blog.create_pages(article_list, categories, articles_per_page)
+
+for page in pages:
+    f = open(page.file_name, 'w')
+    f.write(page.html)
+    f.close()
+    if page.file_name == "%s_%s.html" % (page.title, "1"):
+        f = open("index.html", 'w')
+        f.write(page.html)
+        f.close()
